@@ -5,6 +5,7 @@ import { act } from '@testing-library/react';
 
 const initialState = {
   photos,
+  nextId: photos.length + 1, // Initialize nextId based on initial photos array length to avoid duplicates after deleting
 };
 
 const options = {
@@ -16,17 +17,19 @@ const options = {
     // `unshift()` documentation: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift
     addPhoto: (state, action) => {
       state.photos.unshift(
-        {id: state.photos.length + 1,
+        {id: state.nextId,
          caption: action.payload.caption,
          imageUrl: action.payload.imageUrl
         }
       )
+      state.nextId += 1;
     },
     // Task 6: Create an `removePhoto()` case reducer that removes a photo from state.photos
     // Task 6 Hint: You can use state.photos.splice()
     // `splice()` documentation: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice
     removePhoto: (state, action) => {
-      state.photos.splice(action.payload - 1, 1)
+      const index = state.photos.findIndex(photo => photo.id === action.payload)
+      if (index !== -1) state.photos.splice(index, 1)
     }
   },
 };
@@ -48,6 +51,6 @@ export const selectFilteredPhotos = (state) => {
   }
   
   return photos.filter((photo)=> {
-    photo.caption.toLowerCase().includes(searchTerm)
+    return photo.caption.toLowerCase().includes(searchTerm)
   })
 };
